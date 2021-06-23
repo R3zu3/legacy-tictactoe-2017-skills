@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>La Vieja</title>
+	<script type="text/javascript" src="jquery-3.4.1.min.js"></script>
+	<style type="text/css">
+	html{
+		font-family: Arial;
+	}
+
+	body{
+		margin: 0;
+	}
+
+	table{
+		border-collapse: collapse;
+	}
+
+	#viejaroot input{
+		cursor: pointer !important;
+		text-align: center;
+		height: 50px;
+		width: 50px;
+		font-size: 50px;
+		background: transparent;
+		border: none;
+		color: transparent;
+		text-shadow: 0 0 0 black;
+		text-align: center;
+
+		&:focus {
+    		outline: none;
+		}
+	}
+
+	:focus {
+    	outline: none;
+	}
+
+	.bb{
+		border-bottom: 2px solid black;
+	}
+
+	.br{
+		border-right: 2px solid black;
+	}
+
+	.winner{
+		background: red;
+	}
+
+	.viejaw{
+		background: blue;
+	}
+
+	#viejaroot td:hover{
+		background: gray;
+	}
+
+	#playerchar{
+		width: 37px;
+		display: inline-block;
+	}
+	</style>
+</head>
+<body>
+<div style="position: absolute; right: 0; bottom: 0; padding: 10px;">
+	Renzo Zue
+</div>
+<table style="width: 100vw; height: 100vh;">
+	<tr>
+		<td colspan="3" style="text-align: center;">
+			<h1 id="turnopanel">
+				<div>
+					<span>Turno de: </span><div id="playerchar">X</div>
+				</div>
+			</h1>
+			<h1 id="winnerpanel" style="display: none;">Ganador: <span id="winnerchar">X</span></h1>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<table id="viejaroot" style="margin: auto; border-radius: 10px;">
+				<tr class="bb">
+					<td class="br" style="border-radius: 10px 0px 0px 0px;">
+						<input id="i0" type="text" class="player_i" onkeydown="return false;">
+					</td>
+					<td class="br">
+						<input id="i1" type="text" class="player_i" onkeydown="return false;">
+					</td>
+					<td style="border-radius: 0px 10px 0px 0px;">
+						<input id="i2" type="text" class="player_i" onkeydown="return false;">
+					</td>
+				</tr>
+				<tr class="bb">
+					<td class="br">
+						<input id="i3" type="text" class="player_i" onkeydown="return false;">
+					</td>
+					<td class="br">
+						<input id="i4" type="text" class="player_i" onkeydown="return false;">
+					</td>
+					<td>
+						<input id="i5" type="text" class="player_i" onkeydown="return false;">
+					</td>
+				</tr>
+				<tr>
+					<td class="br" style="border-radius: 0px 0px 0px 10px;">
+						<input id="i6" type="text" class="player_i" onkeydown="return false;">
+					</td>
+					<td class="br">
+						<input id="i7" type="text" class="player_i" onkeydown="return false;">
+					</td>
+					<td style="border-radius: 0px 0px 10px 0px;">
+						<input id="i8" type="text" class="player_i" onkeydown="return false;">
+					</td>
+				</tr>
+			</table>
+		</td>
+	</tr>
+	<tr>
+		<td  colspan="3" style="text-align: center; padding-top: 50px; padding-bottom: 50px;">
+			<button id="reset">Reiniciar</button>
+		</td>
+	</tr>
+</table>
+
+<script type="">
+	var player = 0;
+
+	var w = 0;
+
+	$('#reset').click(function(){
+		$('.player_i').val('');
+		$('.player_i').parent().removeClass('winner');
+		$('#viejaroot').removeClass('viejaw');
+		$('.player_i').removeAttr('disabled');
+		$('#winnerpanel').hide();
+		$('#turnopanel').show();
+		w = 0;
+	})
+
+	$('.player_i').click(function(){
+		$(this).attr('disabled', 'true');
+
+		if (player == 0) {
+			$(this).val('X');
+			player = 1;
+			$('#playerchar').html('O');
+			winners();
+			return;
+		}
+		
+		if (player == 1){
+			$(this).val('O');
+			player = 0;
+			$('#playerchar').html('X');
+			winners();
+			return;
+		}
+	})
+
+	function winners(){
+		w = [
+			$('#i0').val(),	$('#i1').val(),	$('#i2').val(),$('#i3').val(),	$('#i4').val(),	$('#i5').val(),$('#i6').val(),	$('#i7').val(),	$('#i8').val()
+		];
+
+		wi = [
+			[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[2,4,6],[0,4,8]
+		];
+
+		//CALCULAR GANADORES
+
+		for (var i = 0; i < wi.length; i++) {
+			h = '';
+
+			for (var j = 0; j < 3; j++) {
+				h += w[wi[i][j]];
+
+				if ((h == 'XXX' || h == 'OOO')) {
+
+					for (var k = 0; k < 3; k++) {
+
+						$('#i'+wi[i][k]).parent().addClass('winner');
+					}
+
+					declarewinner(w[wi[i][j]]);
+					offall();
+					return;
+				}
+			}
+		}
+
+		//GANA LA VIEJA
+
+		var z = 0;
+
+		w.forEach(function(valor,indice,array){
+			if (valor != '') {
+				z += 1;
+			}
+
+			if (z == 9) {
+				$('#viejaroot').addClass('viejaw');
+				declarewinner('La Vieja');
+			}
+		})
+	}
+
+	function offall(){
+		$('.player_i').attr('disabled', 'true');
+	}
+
+	function declarewinner(str){
+		$('#winnerchar').html(str);
+		$('#winnerpanel').show();
+		$('#turnopanel').hide();
+	}
+</script>
+
+</body>
+</html>
